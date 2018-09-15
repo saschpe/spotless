@@ -8,3 +8,4 @@ com.diffplug.spotless.markdown
 com.diffplug.spotless.scala
 com.diffplug.spotless.sql
 com.diffplug.spotless.sql.dbeaver
+com.diffplug.spotless.xml
