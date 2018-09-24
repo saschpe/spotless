@@ -5,6 +5,7 @@ com.diffplug.spotless.generic
 com.diffplug.spotless.java
 com.diffplug.spotless.kotlin
 com.diffplug.spotless.markdown
+com.diffplug.spotless.npm
 com.diffplug.spotless.scala
 com.diffplug.spotless.sql
 com.diffplug.spotless.sql.dbeaver
