@@ -13,12 +13,17 @@ dependencies {
 	compile "com.googlecode.concurrent-trees:concurrent-trees:2.6.1"
 	// used for xml parsing in EclipseFormatter
 	compile "org.codehaus.groovy:groovy-xml:2.4.7"
+	// Must be provided by the underlying framework
+	// (e.g. Maven/Gradle), whereas the version may differ.
+	compileOnly("org.slf4j:slf4j-api:${VER_SLF4J}")
 
 	// testing
 	testCompile project(':testlib')
 	testCompile "junit:junit:${VER_JUNIT}"
 	testCompile "org.assertj:assertj-core:${VER_ASSERTJ}"
 	testCompile "com.diffplug.durian:durian-testlib:${VER_DURIAN}"
+	testCompile "org.slf4j:slf4j-api:${VER_SLF4J}"
+	testCompile "org.slf4j:slf4j-simple:${VER_SLF4J}"
 }
 
 // we'll hold the core lib to a high standard
