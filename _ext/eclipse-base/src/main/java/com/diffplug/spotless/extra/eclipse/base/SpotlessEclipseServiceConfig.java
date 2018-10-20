@@ -18,12 +18,16 @@ package com.diffplug.spotless.extra.eclipse.base;
 import static com.diffplug.spotless.extra.eclipse.base.SpotlessEclipseFramework.LINE_DELIMITER;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import org.eclipse.core.runtime.content.IContentTypeManager;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.equinox.log.ExtendedLogReaderService;
+import org.eclipse.equinox.log.ExtendedLogService;
 import org.eclipse.osgi.service.datalocation.Location;
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
+import org.osgi.service.log.LogLevel;
 
 import com.diffplug.spotless.extra.eclipse.base.service.*;
 
@@ -102,6 +106,26 @@ public interface SpotlessEclipseServiceConfig {
 	 */
 	default public void changeSystemLineSeparator() {
 		System.setProperty("line.separator", LINE_DELIMITER);
+	}
+
+	/**
+	 * Adds Eclipse logging service which maps to Slf4J logger.
+	 * Note that Slf4J implementation dependency is not part of this framework and must be
+	 * provided in case this service is used.
+	 */
+	default public void useSlf4J(String loggerName) {
+		useSlf4J(loggerName, (s, l) -> s);
+	}
+
+	/**
+	 * Adds Eclipse logging service which maps to Slf4J logger with a message customizer function.
+	 * Note that Slf4J implementation dependency is not part of this framework and must be
+	 * provided in case this service is used.
+	 */
+	default public void useSlf4J(String loggerName, BiFunction<String, LogLevel, String> messageCustomizer) {
+		com.diffplug.spotless.extra.eclipse.base.service.SingleSlf4JService slf4jServce = new com.diffplug.spotless.extra.eclipse.base.service.SingleSlf4JService(loggerName, messageCustomizer);
+		add(ExtendedLogService.class, slf4jServce);
+		add(ExtendedLogReaderService.class, slf4jServce);
 	}
 
 	/** Applies the default configurations. */
