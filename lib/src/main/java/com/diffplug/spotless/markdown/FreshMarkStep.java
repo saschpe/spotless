@@ -81,7 +81,7 @@ public class FreshMarkStep {
 			Logger logger = Logger.getLogger(FreshMarkStep.class.getName());
 			Consumer<String> loggingStream = logger::warning;
 
-			ClassLoader classLoader = jarState.getClassLoader();
+			ClassLoader classLoader = jarState.getClassLoaderOld();
 
 			// instantiate the formatter and get its format method
 			Class<?> formatterClazz = classLoader.loadClass(FORMATTER_CLASS);
