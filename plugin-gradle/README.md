@@ -14,9 +14,9 @@ output = [
 -->
 [![Gradle plugin](https://img.shields.io/badge/plugins.gradle.org-com.diffplug.gradle.spotless-blue.svg)](https://plugins.gradle.org/plugin/com.diffplug.gradle.spotless)
 [![Maven central](https://img.shields.io/badge/mavencentral-com.diffplug.gradle.spotless%3Aspotless-blue.svg)](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.diffplug.spotless%22%20AND%20a%3A%22spotless-plugin-gradle%22)
-[![Javadoc](https://img.shields.io/badge/javadoc-3.14.0-blue.svg)](https://diffplug.github.io/spotless/javadoc/spotless-plugin-gradle/3.14.0/)
+[![Javadoc](https://img.shields.io/badge/javadoc-3.16.0-blue.svg)](https://diffplug.github.io/spotless/javadoc/spotless-plugin-gradle/3.16.0/)
 
-[![Changelog](https://img.shields.io/badge/changelog-3.15.0--SNAPSHOT-brightgreen.svg)](CHANGES.md)
+[![Changelog](https://img.shields.io/badge/changelog-3.17.0--SNAPSHOT-brightgreen.svg)](CHANGES.md)
 [![Travis CI](https://travis-ci.org/diffplug/spotless.svg?branch=master)](https://travis-ci.org/diffplug/spotless)
 [![Live chat](https://img.shields.io/badge/gitter-chat-brightgreen.svg)](https://gitter.im/diffplug/spotless)
 [![License Apache](https://img.shields.io/badge/license-apache-brightgreen.svg)](https://tldrlegal.com/license/apache-license-2.0-(apache-2.0))
@@ -26,7 +26,7 @@ output = [
 output = prefixDelimiterReplace(input, 'https://{{org}}.github.io/{{name}}/javadoc/spotless-plugin-gradle/', '/', stableGradle)
 -->
 
-Spotless is a general-purpose formatting plugin.  It is completely à la carte, but also includes powerful "batteries-included" if you opt-in.
+Spotless is a general-purpose formatting plugin used by [a thousand projects on GitHub](https://github.com/search?l=gradle&q=spotless&type=Code).  It is completely à la carte, but also includes powerful "batteries-included" if you opt-in.
 
 To people who use your build, it looks like this:
 
@@ -75,15 +75,20 @@ spotless {
 }
 ```
 
-Spotless can check and apply formatting to any plain-text file, using simple rules ([javadoc](https://diffplug.github.io/spotless/javadoc/spotless-plugin-gradle/3.14.0/com/diffplug/gradle/spotless/FormatExtension.html)) like those above.  It also supports more powerful formatters:
+Spotless can check and apply formatting to any plain-text file, using simple rules ([javadoc](https://diffplug.github.io/spotless/javadoc/spotless-plugin-gradle/3.16.0/com/diffplug/gradle/spotless/FormatExtension.html)) like those above.  It also supports more powerful formatters:
 
+* Eclipse's [CDT](#eclipse-cdt) C/C++ code formatter
 * Eclipse's java code formatter (including style and import ordering)
+* Eclipse's [WTP-CSS](#eclipse-wtp-css) CSS code formatter
+* Eclipse's [WTP-XML](#eclipse-wtp-xml) XML code formatter
 * Google's [google-java-format](https://github.com/google/google-java-format)
-* [Groovy Eclipse](https://github.com/groovy/groovy-eclipse/wiki)'s groovy code formatter
+* [Groovy Eclipse](#groovy-eclipse)'s groovy code formatter
 * [FreshMark](https://github.com/diffplug/freshmark) (markdown with variables)
 * [ktlint](https://github.com/shyiko/ktlint)
 * [scalafmt](https://github.com/olafurpg/scalafmt)
 * [DBeaver sql format](https://dbeaver.jkiss.org/)
+* [Prettier: An opinionated code formatter](https://prettier.io)
+* [TypeScript Formatter (tsfmt)](https://github.com/vvakame/typescript-formatter)
 * Any user-defined function which takes an unformatted string and outputs a formatted version.
 
 Contributions are welcome, see [the contributing guide](../CONTRIBUTING.md) for development info.
@@ -190,12 +195,12 @@ spotless {
   }
 }
 ```
+<a name="groovy-eclipse"></a>
 
-The [Groovy-Eclipse](https://github.com/groovy/groovy-eclipse) formatter is based on the Eclipse Java formatter as used by `eclipseFormatFile`. It uses the same configuration parameters plus a few additional ones.  These parameters can be configured within a single file, like the Java properties file [greclipse.properties](../lib-extra/src/test/resources/groovy/greclipse/format/greclipse.properties) in the previous example. The formatter step can also load the [exported Eclipse properties](../ECLIPSE_SCREENSHOTS.md) and augment it with the `org.codehaus.groovy.eclipse.ui.prefs` from the Eclipse workspace as shown below.
+### [Groovy-Eclipse](https://github.com/groovy/groovy-eclipse) formatter
 
-[Groovy-Eclipse](https://github.com/groovy/groovy-eclipse) formatter errors/warnings lead
-per default to a build failure. This behavior can be changed by adding the property/key value: `ignoreFormatterProblems=true` to the configuration. In this scenario, files
-causing problems, will not be modified by this formatter step.
+The formatter is based on the Eclipse Java formatter as used by `eclipseFormatFile`. It uses the same configuration parameters plus a few additional ones.
+These parameters can be configured within a single file, like the Java properties file [greclipse.properties](../lib-extra/src/test/resources/groovy/greclipse/format/greclipse.properties) in the previous example. The formatter step can also load the [exported Eclipse properties](../ECLIPSE_SCREENSHOTS.md) and augment it with the `org.codehaus.groovy.eclipse.ui.prefs` from the Eclipse workspace as shown below.
 
 ```gradle
 spotless {
@@ -208,6 +213,8 @@ spotless {
   }
 }
 ```
+
+Groovy-Eclipse formatting errors/warnings lead per default to a build failure. This behavior can be changed by adding the property/key value `ignoreFormatterProblems=true` to a configuration file. In this scenario, files causing problems, will not be modified by this formatter step.
 
 <a name="freshmark"></a>
 
@@ -290,6 +297,219 @@ spotless {
 }
 ```
 
+<a name="cpp"></a>
+
+## Applying to C/C++ sources
+
+```gradle
+spotless {
+  cpp {
+    target '**/*.CPP' // Change file filter. By default files with 'c', 'h', 'C', 'cpp', 'cxx', 'cc', 'c++', 'h', 'hpp', 'hh', 'hxx' and 'inc' extension are supported
+    eclipse().configFile 'spotless.eclipseformat.xml'	// XML file dumped out by the Eclipse formatter
+    // If you have Eclipse preference or property files, you can use them too.
+    // eclipse('4.7.1') to specify a specific version of Eclipse,
+    // available versions are: https://github.com/diffplug/spotless/tree/master/lib-extra/src/main/resources/com/diffplug/spotless/extra/config/eclipse_cdt_formatter
+    licenseHeader '// Licensed under Apache'	// License header
+    licenseHeaderFile './license.txt'	// License header file
+  }
+}
+```
+
+<a name="eclipse-cdt"></a>
+
+### Eclipse [CDT](https://www.eclipse.org/cdt/) formatter
+
+Use the Eclipse to define the *Code Style preferences* (see [Eclipse documentation](https://www.eclipse.org/documentation/)). Within the preferences *Edit...* dialog, you can export your configuration as XML file, which can be used as a `configFile`. If no `configFile` is provided, the CDT default configuration is used.
+
+<a name="css-wtp"></a>
+
+## Applying to CSS sources
+
+```gradle
+spotless {
+  css {
+    target '**/*.css' '**/*.css2'// Change file filter. By default files with 'css' extension are supported
+    eclipse().configFile './css-formatter.prefs' // Properties file of the Eclipse WTP formatter
+    // Use for example eclipse('4.7.3a') to specify a specific version of Eclipse,
+    // available versions are: https://github.com/diffplug/spotless/tree/master/lib-extra/src/main/resources/com/diffplug/spotless/extra/eclipse_wtp_formatters
+    // also supports license headers
+    licenseHeader '<!-- Licensed under Apache-2.0 -->'	// License header
+    licenseHeaderFile './license.txt'	// License header file
+  }
+}
+```
+
+<a name="eclipse-wtp-css"></a>
+
+### Eclipse [WTP](https://www.eclipse.org/webtools/) CSS formatter
+Use Eclipse to define the *CSS Files* editor preferences (see [Eclipse documentation](http://help.eclipse.org/photon/topic/org.eclipse.wst.sse.doc.user/topics/tsrcedt025.html)) and the *Cleanup* preferences available in the *Source* menu (when editing a CSS file). The preferences are stored below your Eclipse workspace directory in `.metadata/.plugins/org.eclipse.core.runtime/org.eclipse.wst.css.core.prefs`. Note that only the differences to the default configuration are stored within the file. Omit the 'configFile' entirely to use the default Eclipse configuration.
+
+<a name="xml-wtp"></a>
+
+## Applying to XML sources
+
+```gradle
+spotless {
+  xml {
+    target '**/*.xml' // Change file filter. By default files with 'xml', 'xsl', 'xslt', 'wsdl', 'xsd', 'exsd' and 'xmi' extension are supported
+    eclipse().configFile './xml-formatter.prefs' // Properties file of the Eclipse WTP formatter
+    // Use for example eclipse('4.7.3a') to specify a specific version of Eclipse,
+    // available versions are: https://github.com/diffplug/spotless/tree/master/lib-extra/src/main/resources/com/diffplug/spotless/extra/eclipse_wtp_formatters
+    // also supports license headers
+    licenseHeader '<!-- Licensed under Apache-2.0 -->'	// License header
+    licenseHeaderFile './license.txt'	// License header file
+  }
+}
+```
+
+<a name="eclipse-wtp-xml"></a>
+
+### Eclipse [WTP](https://www.eclipse.org/webtools/) XML formatter
+Use Eclipse to define the *XML editor preferences* (see [Eclipse documentation](https://www.eclipse.org/documentation/)). The preferences are stored below your Eclipse workspace directory in `.metadata/.plugins/org.eclipse.core.runtime/org.eclipse.wst.xml.core.prefs`. Note that only the differences to the default configuration are stored within the file. Omit the 'configFile' entirely to use the default Eclipse configuration.
+
+The Eclipse WTP formatter supports DTD/XSD restrictions on white spaces. For XSD/DTD lookup, relative and absolute XSD/DTD URIs are supported. Furthermore a user catalog can be configured using the `userCatalog` property key. Add the property to the preference file or add an additional preference or properties files as an additional argument to the `configFile`.
+
+
+<a name="typescript"></a>
+
+## Applying to Typescript source
+
+To use tsfmt, you first have to specify the files that you want it to apply to.
+Then you specify `tsfmt()`, and optionally how you want to apply it.
+
+By default, all typescript source sets will be formatted. To change this,
+set the `target` parameter as described in the [Custom rules](#custom) section.
+
+```gradle
+spotless {
+  typescript {
+    // using existing config files
+    tsfmt().tslintFile('/path/to/repo/tslint.json')
+  }
+}
+```
+Supported config file types are `tsconfigFile`, `tslintFile`, `vscodeFile` and `tsfmtFile`. They are corresponding to the respective
+[tsfmt-parameters](https://github.com/vvakame/typescript-formatter/blob/7764258ad42ac65071399840d1b8701868510ca7/lib/index.ts#L27L34).
+
+*Please note:*
+The auto-discovery of config files (up the file tree) will not work when using tsfmt within spotless,
+  hence you are required to provide resolvable file paths for config files.
+
+... or alternatively provide the configuration inline ...
+
+```gradle
+spotless {
+  typescript {
+    // custom file-set
+    target 'src/main/resources/**/*.ts'
+    // provide config inline
+    tsfmt().config(['indentSize': 1, 'convertTabsToSpaces': true])
+  }
+}
+```
+
+See [tsfmt's default config settings](https://github.com/vvakame/typescript-formatter/blob/7764258ad42ac65071399840d1b8701868510ca7/lib/utils.ts#L11L32) for what is available.
+
+... and it is also possible to apply `prettier()` instead of `tsfmt()` as formatter. For details see the section about [prettier](#typescript-prettier).
+
+### Prerequisite: tsfmt requires a working NodeJS version
+
+tsfmt is based on NodeJS, so to use it, a working NodeJS installation (especially npm) is required on the host running spotless.
+Spotless will try to auto-discover an npm installation. If that is not working for you, it is possible to directly configure the npm binary to use.
+
+```gradle
+spotless {
+  typescript {
+    tsfmt().npmExecutable('/usr/bin/npm').config(...)
+  }
+}
+```
+
+Spotless uses npm to install necessary packages locally. It runs tsfmt using [J2V8](https://github.com/eclipsesource/J2V8) internally after that.
+
+<a name="prettier"></a>
+
+## Applying [Prettier](https://prettier.io) to javascript | flow | typeScript | css | scss | less | jsx | graphQL | yaml | etc.
+
+Prettier is a formatter that can format [multiple file types](https://prettier.io/docs/en/language-support.html).
+
+To use prettier, you first have to specify the files that you want it to apply to.  Then you specify prettier, and how you want to apply it.
+
+```gradle
+spotless {
+  format 'styling', {
+    target '**/*.css', '**/*.scss'
+
+    // at least provide the parser to use
+    prettier().config(['parser': 'postcss'])
+
+    // or provide a typical filename
+    prettier().config(['filepath': 'style.scss'])
+  }
+}
+```
+
+Supported config options are documented on [prettier.io](https://prettier.io/docs/en/options.html).
+
+It is also possible to specify the config via file:
+
+```gradle
+spotless {
+  format 'styling', {
+    target '**/*.css', '**/*.scss'
+
+    prettier().configFile('/path-to/.prettierrc.yml')
+
+    // or provide both (config options take precedence over configFile options)
+    prettier().config(['parser': 'postcss']).configFile('path-to/.prettierrc.yml')
+  }
+}
+```
+
+Supported config file variants are documented on [prettier.io](https://prettier.io/docs/en/configuration.html).
+*Please note:*
+- The auto-discovery of config files (up the file tree) will not work when using prettier within spotless.
+- Prettier's override syntax is not supported when using prettier within spotless.
+
+To apply prettier to more kinds of files, just add more formats
+
+```gradle
+spotless {
+  format 'javascript', {
+    target 'src/main/resources/**/*.js'
+    prettier().config(['filepath': 'file.js'])
+  }
+}
+```
+
+<a name="typescript-prettier"></a>
+Prettier can also be applied from within the [typescript config block](#typescript-formatter):
+
+```gradle
+spotless {
+  typescript {
+    // no parser or filepath needed
+    // -> will default to 'typescript' parser when used in the typescript block
+    prettier()
+  }
+}
+```
+
+### Prerequisite: prettier requires a working NodeJS version
+
+Prettier, like tsfmt, is based on NodeJS, so to use it, a working NodeJS installation (especially npm) is required on the host running spotless.
+Spotless will try to auto-discover an npm installation. If that is not working for you, it is possible to directly configure the npm binary to use.
+
+```gradle
+spotless {
+  format 'javascript', {
+    prettier().npmExecutable('/usr/bin/npm').config(...)
+  }
+}
+```
+
+Spotless uses npm to install necessary packages locally. It runs prettier using [J2V8](https://github.com/eclipsesource/J2V8) internally after that.
+
 <a name="license-header"></a>
 
 ## License header options
@@ -332,7 +552,6 @@ spotless {
 }
 ```
 
-
 <a name="custom"></a>
 
 ## Custom rules
@@ -374,7 +593,7 @@ spotless {
 }
 ```
 
-If you use `custom` or `customLazy`, you might want to take a look at [this javadoc](https://diffplug.github.io/spotless/javadoc/spotless-plugin-gradle/3.14.0/com/diffplug/gradle/spotless/FormatExtension.html#bumpThisNumberIfACustomStepChanges-int-) for a big performance win.
+If you use `custom` or `customLazy`, you might want to take a look at [this javadoc](https://diffplug.github.io/spotless/javadoc/spotless-plugin-gradle/3.16.0/com/diffplug/gradle/spotless/FormatExtension.html#bumpThisNumberIfACustomStepChanges-int-) for a big performance win.
 
 See [`JavaExtension.java`](src/main/java/com/diffplug/gradle/spotless/java/JavaExtension.java?ts=4) if you'd like to see how a language-specific set of custom rules is implemented.  We'd love PR's which add support for other languages.
 
@@ -444,6 +663,7 @@ Note that `enforceCheck` is a global property which affects all formats (outside
 
 Spotless is hosted on jcenter and at plugins.gradle.org. [Go here](https://plugins.gradle.org/plugin/com.diffplug.gradle.spotless) if you're not sure how to import the plugin.
 
+* [One thousand github projects](https://github.com/search?l=gradle&q=spotless&type=Code)
 * [JUnit 5](https://github.com/junit-team/junit-lambda/blob/151d52ffab07881de71a8396a9620f18072c65ec/build.gradle#L86-L101) (aka JUnit Lambda)
 * [opentest4j](https://github.com/ota4j-team/opentest4j/blob/aab8c204be05609e9f76c2c964c3d6845cd0de14/build.gradle#L63-L80)
 * [Durian](https://github.com/diffplug/durian) ([direct link to spotless section in its build.gradle](https://github.com/diffplug/durian/blob/v3.2.0/build.gradle#L65-L85))
