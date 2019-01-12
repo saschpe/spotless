@@ -105,10 +105,6 @@ public final class JarState implements Serializable {
 		return SpotlessCache.instance().classloader(this);
 	}
 
-	public ClassLoader getClassLoaderOld() {
-		return SpotlessCache.instance().classloaderOld(this);
-	}
-
 	/**
 	 * Returns a classloader containing only the jars in this JarState.
 	 *
