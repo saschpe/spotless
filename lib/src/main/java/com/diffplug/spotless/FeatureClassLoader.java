@@ -64,8 +64,11 @@ public class FeatureClassLoader extends URLClassLoader {
 		try {
 			return super.findClass(name);
 		} catch (ClassNotFoundException e) {
-			return buildToolClassLoader.loadClass(name);
+			if (name.startsWith("org.slf4j.")) {
+				return buildToolClassLoader.loadClass(name);
+			} else {
+				throw e;
+			}
 		}
 	}
-
 }
