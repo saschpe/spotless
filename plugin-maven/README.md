@@ -148,6 +148,28 @@ By default, all files matching `src/main/scala/**/*.scala`, `src/test/scala/**/*
 
 By default, all files matching `src/main/kotlin/**/*.kt` and `src/test/kotlin/**/*.kt` Ant style pattern will be formatted.  Each element under `<kotlin>` is a step, and they will be applied in the order specified.  Every step is optional.
 
+### Using detekt
+
+```xml
+<configuration>
+  <kotlin>
+     <licenseHeader>
+       <!-- Specify either content or file, but not both -->
+       <content>/* Licensed under Apache-2.0 */</content>
+       <file>${basedir}/license-header</file>
+     </licenseHeader>
+     <endWithNewLine/>
+     <trimTrailingWhitespace/>
+     <detekt>
+       <!-- Optional, available versions: https://github.com/arturbosch/detekt -->
+       <version>1.0.0-RC14</version>
+     </detekt>
+  </kotlin>
+</configuration>
+```
+
+### Using ktlint
+
 ```xml
 <configuration>
   <kotlin>

@@ -27,6 +27,7 @@ import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 
 import com.diffplug.spotless.FormatterStep;
+import com.diffplug.spotless.kotlin.DetektStep;
 import com.diffplug.spotless.kotlin.KtLintStep;
 
 public class KotlinExtension extends FormatExtension implements HasBuiltinDelimiterForLicense {
@@ -46,40 +47,79 @@ public class KotlinExtension extends FormatExtension implements HasBuiltinDelimi
 		return licenseHeaderFile(licenseHeaderFile, LICENSE_HEADER_DELIMITER);
 	}
 
-	/** Adds the specified version of [ktlint](https://github.com/shyiko/ktlint). */
-	public KotlinFormatExtension ktlint(String version) {
+	/**
+	 * Adds the specified version of [detekt](https://github.com/arturbosch/detekt).
+	 */
+	public KotlinDetektFormatExtension detekt(String version) {
 		Objects.requireNonNull(version);
-		return new KotlinFormatExtension(version, Collections.emptyMap());
+		return new KotlinDetektFormatExtension(this, version, "");
 	}
 
-	public KotlinFormatExtension ktlint() {
+	public KotlinDetektFormatExtension detekt() {
+		return detekt(DetektStep.defaultVersion());
+	}
+
+	public static class KotlinDetektFormatExtension {
+		private final String version;
+		private String configFile;
+		private final FormatExtension formatExtension;
+
+		KotlinDetektFormatExtension(FormatExtension formatExtension, String version, String configFile) {
+			this.version = version;
+			this.configFile = configFile;
+			this.formatExtension = formatExtension;
+			formatExtension.addStep(createStep());
+		}
+
+		public void config(String configFile) {
+			this.configFile = configFile;
+			formatExtension.replaceStep(createStep());
+		}
+
+		private FormatterStep createStep() {
+			return DetektStep.create(version, GradleProvisioner.fromProject(formatExtension.getProject()), configFile);
+		}
+	}
+
+	/**
+	 * Adds the specified version of [ktlint](https://github.com/shyiko/ktlint).
+	 */
+	public KotlinKtlintFormatExtension ktlint(String version) {
+		Objects.requireNonNull(version);
+		return new KotlinKtlintFormatExtension(this, version, Collections.emptyMap());
+	}
+
+	public KotlinKtlintFormatExtension ktlint() {
 		return ktlint(KtLintStep.defaultVersion());
 	}
 
-	public class KotlinFormatExtension {
-
+	public static class KotlinKtlintFormatExtension {
 		private final String version;
 		private Map<String, String> userData;
+		private final FormatExtension formatExtension;
 
-		KotlinFormatExtension(String version, Map<String, String> config) {
+		KotlinKtlintFormatExtension(FormatExtension formatExtension, String version, Map<String, String> config) {
 			this.version = version;
 			this.userData = config;
-			addStep(createStep());
+			this.formatExtension = formatExtension;
+			formatExtension.addStep(createStep());
 		}
 
 		public void userData(Map<String, String> userData) {
 			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
 			// representation.
 			this.userData = userData;
-			replaceStep(createStep());
+			formatExtension.replaceStep(createStep());
 		}
 
 		private FormatterStep createStep() {
-			return KtLintStep.create(version, GradleProvisioner.fromProject(getProject()), userData);
+			return KtLintStep.create(version, GradleProvisioner.fromProject(formatExtension.getProject()), userData);
 		}
 	}
 
-	/** If the user hasn't specified the files yet, we'll assume he/she means all of the kotlin files. */
+	/**
+	 * If the user hasn't specified the files yet, we'll assume he/she means all of the kotlin files.
+	 */
 	@Override
 	protected void setupTask(SpotlessTask task) {
 		if (target == null) {

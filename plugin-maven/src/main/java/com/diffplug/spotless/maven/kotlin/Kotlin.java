@@ -23,7 +23,6 @@ import com.diffplug.common.collect.ImmutableSet;
 import com.diffplug.spotless.maven.FormatterFactory;
 
 public class Kotlin extends FormatterFactory {
-
 	private static final Set<String> DEFAULT_INCLUDES = ImmutableSet.of("src/main/kotlin/**/*.kt", "src/test/kotlin/**/*.kt");
 
 	@Override
@@ -34,6 +33,10 @@ public class Kotlin extends FormatterFactory {
 	@Override
 	public String licenseHeaderDelimiter() {
 		return LICENSE_HEADER_DELIMITER;
+	}
+
+	public void addDetekt(Detekt detekt) {
+		addStepFactory(detekt);
 	}
 
 	public void addKtlint(Ktlint ktlint) {

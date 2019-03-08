@@ -83,6 +83,7 @@ Spotless can check and apply formatting to any plain-text file, using simple rul
 * Google's [google-java-format](https://github.com/google/google-java-format)
 * [Groovy Eclipse](#groovy-eclipse)'s groovy code formatter
 * [FreshMark](https://github.com/diffplug/freshmark) (markdown with variables)
+* [detekt](https://github.com/arturbosch/detekt)
 * [ktlint](https://github.com/shyiko/ktlint)
 * [scalafmt](https://github.com/olafurpg/scalafmt)
 * [DBeaver sql format](https://dbeaver.jkiss.org/)
@@ -246,6 +247,37 @@ spotless {
     scalafmt()
     // optional: you can specify a specific version or config file
     scalafmt('0.5.1').configFile('scalafmt.conf')
+  }
+}
+```
+
+<a name="detekt"></a>
+
+## Applying [detekt](https://github.com/arturbosch/detekt) to Kotlin files
+
+```gradle
+spotless {
+  kotlin {
+    // optionally takes a version
+    detekt()
+    // Optional configration file can be set as such:
+    detekt().config("my-detekt-baseline.xml")
+
+    // also supports license headers
+    licenseHeader '/* Licensed under Apache-2.0 */'	// License header
+    licenseHeaderFile 'path-to-license-file'		// License header file
+  }
+  kotlinGradle {
+    // same as kotlin, but for .gradle.kts files (defaults to '*.gradle.kts')
+    target '*.gradle.kts', 'additionalScripts/*.gradle.kts'
+
+    detekt()
+
+    // Optional configration file can be set as such:
+    detekt().config("my-detekt-baseline.xml")
+
+    // doesn't support licenseHeader, because scripts don't have a package statement
+    // to clearly mark where the license should go
   }
 }
 ```

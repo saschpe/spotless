@@ -20,6 +20,7 @@ You might be looking for:
 
 **WARNING: xml formatter in this version may be vulnerable to XXE attacks, fixed in 1.20.0 (see [#358](https://github.com/diffplug/spotless/issues/358)).**
 
+* Added support for Kotlin via [detekt](https://github.com/arturbosch/detekt) ([#XXX](https://github.com/diffplug/spotless/pull/XXX))
 * Security fix: Updated groovy, c/c++, and eclipse WTP formatters so that they download their source jars securely using `https` rather than `http` ([#360](https://github.com/diffplug/spotless/issues/360)).
 * Updated default eclipse-jdt from 4.9.0 to 4.10.0 ([#368](https://github.com/diffplug/spotless/pull/368))
 

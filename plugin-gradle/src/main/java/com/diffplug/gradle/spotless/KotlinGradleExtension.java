@@ -16,11 +16,9 @@
 package com.diffplug.gradle.spotless;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 
-import com.diffplug.common.collect.ImmutableSortedMap;
-import com.diffplug.spotless.FormatterStep;
+import com.diffplug.spotless.kotlin.DetektStep;
 import com.diffplug.spotless.kotlin.KtLintStep;
 
 public class KotlinGradleExtension extends FormatExtension {
@@ -32,37 +30,26 @@ public class KotlinGradleExtension extends FormatExtension {
 		super(rootExtension);
 	}
 
+	/**
+	 * Adds the specified version of [detekt](https://github.com/arturbosch/detekt).
+	 */
+	public KotlinExtension.KotlinDetektFormatExtension detekt(String version) {
+		Objects.requireNonNull(version);
+		return new KotlinExtension.KotlinDetektFormatExtension(this, version, "");
+	}
+
+	public KotlinExtension.KotlinDetektFormatExtension detekt() {
+		return detekt(DetektStep.defaultVersion());
+	}
+
 	/** Adds the specified version of [ktlint](https://github.com/shyiko/ktlint). */
-	public KotlinFormatExtension ktlint(String version) {
+	public KotlinExtension.KotlinKtlintFormatExtension ktlint(String version) {
 		Objects.requireNonNull(version, "version");
-		return new KotlinFormatExtension(version, Collections.emptyMap());
+		return new KotlinExtension.KotlinKtlintFormatExtension(this, version, Collections.emptyMap());
 	}
 
-	public KotlinFormatExtension ktlint() {
+	public KotlinExtension.KotlinKtlintFormatExtension ktlint() {
 		return ktlint(KtLintStep.defaultVersion());
-	}
-
-	public class KotlinFormatExtension {
-
-		private final String version;
-		private Map<String, String> userData;
-
-		KotlinFormatExtension(String version, Map<String, String> config) {
-			this.version = version;
-			this.userData = config;
-			addStep(createStep());
-		}
-
-		public void userData(Map<String, String> userData) {
-			// Copy the map to a sorted map because up-to-date checking is based on binary-equals of the serialized
-			// representation.
-			this.userData = ImmutableSortedMap.copyOf(userData);
-			replaceStep(createStep());
-		}
-
-		private FormatterStep createStep() {
-			return KtLintStep.createForScript(version, GradleProvisioner.fromProject(getProject()), userData);
-		}
 	}
 
 	@Override
